@@ -59,7 +59,7 @@ public class Run {
 		cs.setListeArmementCaC(listeArmementCaC);
 		cs.setListeArmementTir(listeArmementTir);
 		
-		JsonFactory<CharSheet> jsonFactory = new JsonFactory<CharSheet>();
+		JsonFactory<CharSheet> jsonFactory = new JsonFactory<CharSheet>(CharSheet.class);
 		
 		jsonFactory.write(cs, "./test_zipped.sav", true);
 		CharSheet cs2 = jsonFactory.read("./test_zipped.sav", true);
