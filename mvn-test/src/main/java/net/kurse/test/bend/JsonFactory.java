@@ -16,29 +16,34 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 
-import net.kurse.test.bo.CharSheet;
-
 public class JsonFactory<T> {
 
+	/**
+	 * Chemin par défaut du fichier temporaire en cas si on choisit de zipper
+	 */
 	private static final String TEMP_PATH = "./cst.temp";
 	
+	/**
+	 * Type du paramètre de la Factory
+	 */
 	private Class<T> type;
-	
-//	public JsonFactory() {
-//		this.type = (Class<T>) getClass();
-////		type.getName();
-////		type.get
-////		String s = new String();
-////	}
+
+	/**
+	 * Permet de construire la factory. On passe le type du Paramètre... en paramètre!
+	 * @param type le type de la classe annotée JSON qui sera sérialisée/désérialisée par la factory
+	 */
+	public JsonFactory(Class<T> type) {
+		this.type = type;
+	}
 	
 	/**
-	 * Ecrit l'objet CharSheet pass� en param�tres dans un fichier JSON
-	 * @param cs l'objet CharSheet � sauvegarder
-	 * @param path le chemin complet du fichier � �crire
-	 * @param zipFile indique si le fichier doit �tre zipp� ou non
+	 * Ecrit l'objet CharSheet passé en paramètres dans un fichier JSON
+	 * @param cs l'objet CharSheet à sauvegarder
+	 * @param path le chemin complet du fichier à écrire
+	 * @param zipFile indique si le fichier doit être zippé ou non
 	 */
-	public void write(CharSheet cs, String path, boolean zipFile) {
-		String json = writeJson(cs);
+	public void write(T t, String path, boolean zipFile) {
+		String json = writeJson(t);
 		if (zipFile) {
 			writeFile(json, null, true);
 			zipFile(path);	
@@ -50,9 +55,9 @@ public class JsonFactory<T> {
 	}
 	
 	/**
-	 * Lit le fichier JSON et restitue le r�sultat sous la forme d'un objet du type pass� en param�tre
-	 * @param path le chemin du fichier JSON zipp�
-	 * @param zippedFile indique si le fichier JSON a lire est zipp� ou non
+	 * Lit le fichier JSON et restitue le résultat sous la forme d'un objet du type passé en paramètre
+	 * @param path le chemin du fichier JSON zippé
+	 * @param zippedFile indique si le fichier JSON a lire est zippé ou non
 	 * @return l'objet CharSheet
 	 */
 	public T read(String path, boolean zippedFile) {
@@ -66,6 +71,11 @@ public class JsonFactory<T> {
 		return result;
 	}
 
+	/**
+	 * Lit le fichier JSON dont le chemin est passé en paramètre
+	 * @param file l'objet File à lire
+	 * @return
+	 */
 	private T readJson(File file) {
 		T result = null;
 		try {
@@ -82,6 +92,11 @@ public class JsonFactory<T> {
 		return result;
 	}
 
+	/**
+	 * Permet de dézipper l'objet dont le chemin est indiqué
+	 * @param path chemin du fichier à dézipper
+	 * @return objet File du fichier dézippé 
+	 */
 	private File unzipFile(String path) {
 		
 		File newFile = null;
@@ -104,7 +119,6 @@ public class JsonFactory<T> {
 				fos.write(buffer, 0, len);
 			}
 
-				
 			fos.close();
 
 			zis.closeEntry();
@@ -119,12 +133,17 @@ public class JsonFactory<T> {
 		return newFile;
 	}
 	
-	private String writeJson (CharSheet cs) {
+	/**
+	 * Converti l'objet (annoté JSON) passé en paramètre en un flux JSON
+	 * @param t l'objet annoté à convertir
+	 * @return le flux JSON
+	 */
+	private String writeJson (T t) {
 		String result = null;
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
-			result = mapper.writeValueAsString(cs);
+			result = mapper.writeValueAsString(t);
 			System.out.println(result);
 		} catch (JsonGenerationException e) {
 			e.printStackTrace();
@@ -136,6 +155,12 @@ public class JsonFactory<T> {
 		return result;
 	}
 	
+	/**
+	 * Permet d'écrire un flux JSON dans un fichier 
+	 * @param json le flux à écrire
+	 * @param path le chemin du fichier qui contiendra le flux
+	 * @param zipFile détermine si le fichier cible devra être zippé (true) ou non (false)
+	 */
 	private void writeFile(String json, String path, boolean zipFile) {
 		if (zipFile) path = TEMP_PATH;
 		try {
@@ -148,6 +173,10 @@ public class JsonFactory<T> {
 		}
 	}
 	
+	/**
+	 * Permet de zipper le fichier dont le chemin est passé en paramètre
+	 * @param path chemin du fichier à zipper
+	 */
 	private void zipFile(String path) {
 		byte[] buffer = new byte[1024];
     	
@@ -175,10 +204,6 @@ public class JsonFactory<T> {
     	}catch(IOException ex){
     	   ex.printStackTrace();
     	}
-	}
-	
-	public Class<?> getType() {
-		return this.type;
 	}
 	
 }
